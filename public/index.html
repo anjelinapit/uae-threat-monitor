@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UAE Threat Monitor | Intelligence Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/public/styles.css">
+</head>
+<body class="hud-environment">
+  <div class="scanlines"></div>
+  
+  <div class="top-shell">
+    <header>
+      <div class="logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 100 100" class="logo-svg">
+            <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="10 5" />
+            <path d="M50 20 L50 80 M20 50 L80 50" stroke="currentColor" stroke-width="2" />
+            <rect x="40" y="40" width="20" height="20" fill="currentColor" opacity="0.5" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="glitch" data-text="UAE Threat Monitor">UAE Threat Monitor</h1>
+        </div>
+      </div>
+
+      <div class="header-status">
+        <span id="liveBadge" class="live-badge">LIVE CACHE</span>
+      </div>
+
+      <div class="hud-counters">
+        <div class="counter-box">
+          <span class="counter-label">ACTIVE_THREATS</span>
+          <strong id="missile24h" class="counter-value text-red">0</strong>
+          <div class="counter-bar bg-red"></div>
+        </div>
+        <div class="counter-box">
+          <span class="counter-label">SIGNAL_STRENGTH</span>
+          <strong id="strike24h" class="counter-value text-cyan">98</strong>
+          <div class="counter-bar bg-cyan"></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <span class="toolbar-label">SECTOR SELECT</span>
+        <div class="btn-grid">
+          <button class="scope-btn active" data-scope="all">ALL_UAE</button>
+          <button class="scope-btn" data-scope="abu-dhabi">AUH_01</button>
+          <button class="scope-btn" data-scope="dubai">DXB_02</button>
+          <button class="scope-btn" data-scope="sharjah">SHJ_03</button>
+          <button class="scope-btn" data-scope="northern">NTH_04</button>
+        </div>
+      </div>
+      <div class="toolbar-group">
+        <span class="toolbar-label">CRITICALITY</span>
+        <div class="btn-grid">
+          <button class="criticality-btn active" data-criticality="all">ALL</button>
+          <button class="criticality-btn" data-criticality="critical">CRIT</button>
+          <button class="criticality-btn" data-criticality="high">HIGH</button>
+          <button class="criticality-btn" data-criticality="watch">WCH</button>
+        </div>
+      </div>
+      <div class="toolbar-actions">
+        <button id="clearEmirateBtn" class="action-btn">RESET_FILTER</button>
+        <button class="refresh-btn" id="refreshBtn">REFRESH_SOURCE</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="hud-layout">
+    <aside class="hud-panel terminal-panel left-wing">
+      <div class="panel-header">
+        <div class="panel-icon"><i class="fa-solid fa-terminal"></i></div>
+        <h2>Event Feed</h2>
+        <div class="greeble-dots"></div>
+      </div>
+      <div class="terminal-container">
+        <div class="terminal-header">
+          <span>Time</span>
+          <span>Origin</span>
+          <span>Status</span>
+        </div>
+        <div class="timeline" id="timeline"></div>
+      </div>
+      <div class="panel-footer">
+        <span class="typing-cursor">_</span>
+        <span id="statusText">INITIALIZING...</span>
+      </div>
+    </aside>
+
+    <section class="hud-rail">
+      <aside class="hud-panel intel-panel right-wing">
+        <div class="panel-header">
+          <div class="panel-icon"><i class="fa-solid fa-microchip"></i></div>
+          <h2>Intel Pulse</h2>
+          <div class="greeble-dots"></div>
+        </div>
+        <div class="intel-content">
+          <div class="pulse-section">
+            <h3 class="section-title">Dynamic Intel Cloud</h3>
+            <div id="wordCloud" class="word-cloud-container">
+              <div class="empty-box">INITIALIZING_CLOUD...</div>
+            </div>
+        </div>
+        <div class="pulse-section">
+          <h3 class="section-title">Drone / Missile Mentions</h3>
+          <div class="sector-grid" id="cloudGrid">
+            <div class="empty-box">WAITING...</div>
+          </div>
+        </div>
+        </div>
+      </aside>
+
+      <section class="hud-center">
+        <div class="map-hud-frame">
+          <div class="hud-bracket top-left"></div>
+          <div class="hud-bracket top-right"></div>
+          <div class="hud-bracket bottom-left"></div>
+          <div class="hud-bracket bottom-right"></div>
+          
+          <div class="scanning-rings">
+            <div class="ring ring-1"></div>
+            <div class="ring ring-2"></div>
+            <div class="ring ring-3"></div>
+          </div>
+          
+          <div class="map-shell">
+            <div class="map-live-label">LIVE_FEED</div>
+            <div class="map-toolbar-card">
+              <div class="map-toolbar-line">
+                <span class="toolbar-caption">Active region</span>
+                <strong id="selectedRegionLabel">All Emirates</strong>
+              </div>
+              <p id="mapHint">Operational map showing same-day UAE reporting, strategic sites, and direct-attack traces for confirmed missile or drone incidents since 12:00 AM UAE time.</p>
+            </div>
+            <div id="map"></div>
+            <div class="map-legend" id="mapLegend">
+              <div class="legend-title">Legend</div>
+              <div class="legend-grid">
+                <div class="legend-item"><span class="legend-icon">✈️</span><span>Airport</span></div>
+                <div class="legend-item"><span class="legend-icon">⚓</span><span>Port</span></div>
+                <div class="legend-item"><span class="legend-icon">⚡</span><span>Energy</span></div>
+                <div class="legend-item"><span class="legend-icon">💧</span><span>Water / Desal</span></div>
+                <div class="legend-item"><span class="legend-icon">☢️</span><span>Nuclear</span></div>
+                <div class="legend-item"><span class="legend-icon">🖥️</span><span>Data / AI</span></div>
+                <div class="legend-item"><span class="legend-icon">🏢</span><span>Landmark</span></div>
+                <div class="legend-item"><span class="legend-icon">🏗️</span><span>Infrastructure</span></div>
+              </div>
+            </div>
+            <div class="crosshair"></div>
+            <div class="coord-overlay">
+              <div id="latCoord">LAT: 24.4539</div>
+              <div id="lngCoord">LNG: 54.3773</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="warning-bar" id="warningBar"></div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="hud-footer">
+    <div class="footer-left">ENCRYPTED_DATA_STREAM // NODE_B_42</div>
+    <div id="lastUpdated" class="footer-right">SYNC_PENDING</div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="/public/app.js"></script>
+</body>
+</html>

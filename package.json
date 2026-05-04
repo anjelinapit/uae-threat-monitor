@@ -1,0 +1,10 @@
+{
+  "name": "uae-threat-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lightweight UAE threat monitor with a tiny Node server and live-source normalization",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js"
+  }
+}
